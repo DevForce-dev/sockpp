@@ -541,7 +541,6 @@ namespace sockpp {
         }
     }
 
-
     void mbedtls_context::allow_only_certificate(mbedtls_x509_crt *certificate) {
         pinned_cert_.reset();
         if (certificate) {
@@ -576,9 +575,12 @@ namespace sockpp {
         auto ident_cert = parse_cert(certificate_data, false);
 
         unique_ptr<key> ident_key(new key);
-        int err = mbedtls_pk_parse_key(ident_key.get(),
-                                       (const uint8_t*) private_key_data.data(),
-                                       private_key_data.size(), NULL, 0);
+
+		int err = mbedtls_pk_parse_key(
+            ident_key.get(),
+            reinterpret_cast<const uint8_t*>(private_key_data.data()),
+            private_key_data.size(), nullptr, 0, nullptr, nullptr);
+
         if( err != 0 ) {
             log_mbed_ret(err, "mbedtls_pk_parse_key");
             throw sys_error(err);
